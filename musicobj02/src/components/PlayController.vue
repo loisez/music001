@@ -11,7 +11,7 @@
             <svg class="icon" aria-hidden="true" @click="play" v-if="abc">
                 <use xlink:href="#icon-bofang1"></use>
             </svg>
-            <svg class="icon" aria-hidden="flase" @click="play" v-else>
+            <svg class="icon" aria-hidden="true" @click="play" v-else>
                 <use xlink:href="#icon-iconstop"></use>
             </svg>
             <svg class="icon" aria-hidden="true" >
@@ -28,22 +28,35 @@
     </div>
 </template>
 
+
 <script>
 import { mapState } from 'vuex';
 import playMusic from "@/components/PlayMusic.vue"
-export default{
-    name:"playcontroller",
+import{ getLyric }from "@/api/index"
+import store from "@/store/index"
+export default {
+    name: "playcontroller",
     data(){
-        return{
-            abc:true, //当前音乐是否处于暂停状态
+        return {
+            abc:true,  //当前音乐是否处于暂停状态
             show:false
         }
     },
     components:{
         playMusic
     },
+   async mounted(){   //view与model绑定成功之后
+       var res = await getLyric(this.playlist[this.playCurrentIndex].id);
+       console.log(res.data.lrc.lyric);
+       store.commit("setLyric",res.data.lrc.lyric)
+    },
+    async updated(){   //view与model绑定成功之后
+       var res = await getLyric(this.playlist[this.playCurrentIndex].id);
+       //console.log(res);
+       store.commit("setLyric",res.data.lrc.lyric)
+    },
     computed:{
-        ...mapState(["playlist","playCurrentIndex"])
+        ...mapState(["playlist","playCurrentIndex"])  //获取正在播放歌曲列表以及正在播放歌曲下标
     },
     methods:{
         play(){
@@ -61,45 +74,46 @@ export default{
     }
 }
 </script>
+
 <style lang="less">
-        .playController {
-            background: #fff;
-            width: 7.5rem;
-            height: 1.2rem;
-            position: fixed;
-            left: 0;
-            bottom: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid #ccc;
-        
-            .left {
-                display: flex;
-                padding: 0 0.2rem;
-        
-                img {
-                    width: 0.8rem;
-                    height: 0.8rem;
-                    border-radius: 0.4rem;
-                }
-        
-                .content {
-                    padding: 0 0.2rem;
-        
-                    .tips {
-                        font-size: 0.2rem;
-                        color: #999;
-                    }
-                }
-            }
-        
-            .right {
-                .icon {
-                    width: 0.4rem;
-                    height: 0.4rem;
-                    margin: 0 0.2rem;
-                }
+.playController {
+    background: #fff;
+    width: 7.5rem;
+    height: 1.2rem;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #ccc;
+
+    .left {
+        display: flex;
+        padding: 0 0.2rem;
+
+        img {
+            width: 0.8rem;
+            height: 0.8rem;
+            border-radius: 0.4rem;
+        }
+
+        .content {
+            padding: 0 0.2rem;
+
+            .tips {
+                font-size: 0.2rem;
+                color: #999;
             }
         }
-        </style>
+    }
+
+    .right {
+        .icon {
+            width: 0.4rem;
+            height: 0.4rem;
+            margin: 0 0.2rem;
+        }
+    }
+}
+</style>
